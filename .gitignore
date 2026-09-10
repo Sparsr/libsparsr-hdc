@@ -1,0 +1,6 @@
+build/
+examples/mnist/build/
+examples/mnist/data/
+__pycache__/
+*.o
+*.so

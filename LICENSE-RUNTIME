@@ -1,0 +1,33 @@
+Copyright (c) 2026 Sparsr. All rights reserved.
+
+THE SPARSR RUNTIME BUNDLED IN THIS TARBALL
+
+The Sparsr HDC library is published under the MIT License, whose text is in the
+file LICENSE beside this one. That licence covers lib/libsparsr_hdc.so and
+include/sparsr_hdc.h. It has one exception, and this file is it.
+
+The following files are the Sparsr host runtime and the Sparsr device model.
+They are proprietary software of Sparsr:
+
+    bin/sparsr-vm
+    include/sparsr.h
+    lib/libsparsr_host.so
+    lib/libsparsr_vm.so
+    lib/libsparsr_vmproc.so
+    lib/libsparsr_softemu.so
+
+They are provided to you for running the HDC library and applications built on
+it. They are not open source. You may not redistribute them other than as part
+of an unmodified copy of this tarball, and you may not reverse engineer,
+decompile or disassemble them, except to the extent that applicable law
+expressly permits despite this limitation.
+
+lib/libsparsr_hdc.so is not part of this exception: it is licensed under the
+MIT License, and its source is published.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL SPARSR
+BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF
+CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE
+SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
