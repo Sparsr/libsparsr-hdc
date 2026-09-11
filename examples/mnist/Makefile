@@ -50,7 +50,7 @@ $(HOST_BIN): $(HOST_SRC) $(HDC_LIB) | check-sdk
 	@mkdir -p $(BUILD_DIR)
 	$(CC) $(CFLAGS) -I$(HDC_INCLUDE) -I$(SPARSR_SDK_ROOT)/include -o $@ $(HOST_SRC) \
 	    -L$(HDC_BUILD_DIR) -L$(SPARSR_SDK_ROOT)/lib \
-	    -Wl,-rpath,'$$ORIGIN/../../../build:$(abspath $(SPARSR_SDK_ROOT))/lib' \
+	    -Wl,-rpath,'$$ORIGIN/../../../build:$(abspath $(SPARSR_SDK_ROOT))/lib' -Wl,--no-as-needed \
 	    -lsparsr_hdc -lsparsr_host -lm -lstdc++ -pthread
 
 # The library's kernels are RV32I, so they run on the Sparsr VM. The default softemu backend

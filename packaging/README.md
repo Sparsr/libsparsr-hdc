@@ -13,6 +13,7 @@ lib/libsparsr_*.so       the Sparsr runtime: host library, VM, and two more back
 bin/sparsr-vm            the Sparsr VM as a program, for the out-of-process backend
 LICENSE                  MIT, for the library and its header
 LICENSE-RUNTIME          the terms for the runtime files
+THIRD-PARTY-NOTICES      the .NET runtime's notices, for the two binaries that contain it
 ```
 
 ## Building against it
