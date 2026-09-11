@@ -14,11 +14,12 @@ on:
   workflow_dispatch:
 
 env:
-  # SPARSR_RELEASES_REPO, a repository variable, names where Sparsr publishes its releases;
-  # SPARSR_RELEASES_TOKEN, a repository secret, reads them.
-  # The Sparsr release the SDK is taken from. Pinned so that an SDK change cannot break a
+  # SPARSR_GITHUB_RELEASES_REPO, a repository variable, names the GitHub repository whose
+  # GitHub Releases carry the Sparsr tarballs; SPARSR_GITHUB_RELEASES_TOKEN, a repository
+  # secret, is a read-only token for that repository.
+  # The tag of the GitHub release the SDK is taken from. Pinned so that an SDK change cannot break a
   # library change that touched nothing; bump it on purpose.
-  SPARSR_SDK_RELEASE: nightly-20260910-184506-34516050919-1
+  SPARSR_SDK_GITHUB_RELEASE_TAG: nightly-20260910-184506-34516050919-1
 
 jobs:
   build-and-test:
@@ -34,17 +35,17 @@ jobs:
 
       - name: Fetch the Sparsr SDK
         env:
-          GH_TOKEN: ${{ secrets.SPARSR_RELEASES_TOKEN }}
+          GH_TOKEN: ${{ secrets.SPARSR_GITHUB_RELEASES_TOKEN }}
         run: |
           set -euo pipefail
           if [[ -z "${GH_TOKEN:-}" ]]; then
-            echo "No SPARSR_RELEASES_TOKEN is available to this run, so the SDK cannot be fetched."
+            echo "No SPARSR_GITHUB_RELEASES_TOKEN is available to this run, so the SDK cannot be fetched."
             echo "That is expected for a pull request from a fork: a maintainer runs the full check"
             echo "by pushing the branch to this repository. See CONTRIBUTING.md."
             exit 1
           fi
           mkdir -p "$RUNNER_TEMP/sdk"
-          gh release download "$SPARSR_SDK_RELEASE" --repo "${{ vars.SPARSR_RELEASES_REPO }}" --pattern 'sparsr-sdk-*.tar.gz' --dir "$RUNNER_TEMP"
+          gh release download "$SPARSR_SDK_GITHUB_RELEASE_TAG" --repo "${{ vars.SPARSR_GITHUB_RELEASES_REPO }}" --pattern 'sparsr-sdk-*.tar.gz' --dir "$RUNNER_TEMP"
           tar xzf "$RUNNER_TEMP"/sparsr-sdk-*.tar.gz -C "$RUNNER_TEMP/sdk" --strip-components=1
           echo "SPARSR_SDK_ROOT=$RUNNER_TEMP/sdk" >> "$GITHUB_ENV"
 
