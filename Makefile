@@ -33,9 +33,23 @@ SDK_INCLUDE_DIRS := -I$(SPARSR_SDK_ROOT)/include
 KERNEL_LDSCRIPT := $(SPARSR_SDK_ROOT)/ldscripts/sparsr.ld
 KERNEL_STARTUP := $(SPARSR_SDK_ROOT)/startup/sparsr_crt0.S
 SDK_LIB_DIR := $(SPARSR_SDK_ROOT)/lib
-# The library resolves the runtime where the SDK keeps it, beside itself first. Absolute,
+# The harness resolves the runtime where the SDK keeps it, beside itself first. Absolute,
 # because a build tree and an SDK have no fixed relationship.
 RPATH_TO_SPARSR_LIB := '$$ORIGIN:$(abspath $(SPARSR_SDK_ROOT))/lib'
+# The library looks beside itself and nowhere else. Everywhere it is installed -- the SDK,
+# the HDC tarball, the torchhd-sparsr wheel -- the runtime is in the same directory, and an
+# absolute path baked in here is searched on every machine that loads the library and
+# printed by readelf to anyone who asks. The published 0.2.0 wheel carried
+# /repo/software/build/sdk-root/lib from the build container that way.
+#
+# So a program that loads this library from a build tree has to link libsparsr_host
+# itself, with --no-as-needed, as the harness and the mnist example do below. The loader
+# maps a program's own dependencies before it follows theirs, so the runtime is already
+# loaded by the time this library asks for it. Without --no-as-needed, a toolchain that
+# defaults to --as-needed (Debian's does) drops the runtime from the program's own list
+# because the program calls nothing in it directly, and the library then looks beside
+# itself and finds nothing.
+LIB_RPATH := '$$ORIGIN'
 
 BUILD_DIR := build
 GEN_DIR := $(BUILD_DIR)/gen
@@ -119,7 +133,7 @@ $(BUILD_DIR)/sparsr_hdc.o: src/sparsr_hdc.c include/sparsr_hdc.h src/device/hdc_
 	$(CC) $(CFLAGS) -Iinclude -Isrc/device -I$(GEN_DIR) $(SDK_INCLUDE_DIRS) -c $< -o $@
 
 $(LIB): $(BUILD_DIR)/sparsr_hdc.o
-	$(CC) -shared -Wl,-soname,libsparsr_hdc.so -Wl,-rpath,$(RPATH_TO_SPARSR_LIB) -o $@ $< \
+	$(CC) -shared -Wl,-soname,libsparsr_hdc.so -Wl,-rpath,$(LIB_RPATH) -o $@ $< \
 	    -L$(SDK_LIB_DIR) -lsparsr_host -lm
 
 # The harness sees src/device and the generated images as well as the public header: one
@@ -127,7 +141,7 @@ $(LIB): $(BUILD_DIR)/sparsr_hdc.o
 # library returns can reveal. Every other case goes through include/ alone.
 $(TEST_BIN): test/test_hdc.c $(LIB) $(KERNEL_HEADER)
 	$(CC) $(CFLAGS) -Iinclude -Isrc/device -I$(GEN_DIR) $(SDK_INCLUDE_DIRS) -o $@ $< -L$(BUILD_DIR) -L$(SDK_LIB_DIR) \
-	    -Wl,-rpath,$(RPATH_TO_SPARSR_LIB) \
+	    -Wl,-rpath,$(RPATH_TO_SPARSR_LIB) -Wl,--no-as-needed \
 	    -lsparsr_hdc -lsparsr_host -lm -lstdc++ -pthread
 
 # The kernels are RV32I, so they run on the Sparsr VM. The default softemu backend

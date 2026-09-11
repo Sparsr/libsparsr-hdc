@@ -23,7 +23,14 @@ decompile or disassemble them, except to the extent that applicable law
 expressly permits despite this limitation.
 
 lib/libsparsr_hdc.so is not part of this exception: it is licensed under the
-MIT License, and its source is published.
+MIT License, and its source is at https://github.com/Sparsr/libsparsr-hdc.
+
+bin/sparsr-vm and lib/libsparsr_vm.so contain the .NET runtime, which is
+licensed under the MIT License by the .NET Foundation and Contributors. That
+notice, and the notices of the components inside the runtime, are in
+THIRD-PARTY-NOTICES beside this file. The restrictions above are Sparsr's terms
+for Sparsr's work in those binaries; they do not narrow what those notices
+grant.
 
 THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
 IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
