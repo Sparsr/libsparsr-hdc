@@ -258,12 +258,12 @@ static hdc_status write_row(uint32_t row, const hdc_hypervector *vector) {
      * here; the frame that follows is. */
     uint8_t scratch[HDC_HYPERVECTOR_BYTES];
     memcpy(scratch, vector->bytes, HDC_HYPERVECTOR_BYTES);
-    sparsr_write_data_cmem(scratch, row);
+    sparsr_write_data_wmem(scratch, row);
     return HDC_OK;
 }
 
 static hdc_status read_row(uint32_t row, hdc_hypervector *out) {
-    uint8_t *bytes = sparsr_read_data_cmem(row);
+    uint8_t *bytes = sparsr_read_data_wmem(row);
     if (bytes == NULL) return HDC_ERROR_DEVICE;
 
     memcpy(out->bytes, bytes, HDC_HYPERVECTOR_BYTES);
@@ -393,7 +393,7 @@ hdc_status hdc_bundle_majority(const hdc_hypervector *const *vectors, size_t cou
         }
 
         /* The counter planes live in wide registers and a batch does not clear them, which
-         * is what lets this pick up where the last batch left off without spending a CMEM
+         * is what lets this pick up where the last batch left off without spending a WMEM
          * row on the accumulator. */
         status = run_majority(HDC_MAJORITY_MODE_ACCUMULATE, (uint32_t)take, 0, &device_status);
         if (status != HDC_OK) return status;

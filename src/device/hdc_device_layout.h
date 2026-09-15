@@ -8,9 +8,9 @@
  *
  * WHAT THIS RESERVES, AND WHY THAT IS A PROBLEM TODAY
  *
- * Nothing arbitrates access to a Sparsr device. There is no allocator for CMEM rows and
+ * Nothing arbitrates access to a Sparsr device. There is no allocator for WMEM rows and
  * none for instruction memory, so a library that wants either simply takes it and hopes
- * nothing else wanted the same. This library takes CMEM rows 0 to 31 -- every row there is
+ * nothing else wanted the same. This library takes WMEM rows 0 to 31 -- every row there is
  * -- and the front of instruction memory for its kernels, which it holds from
  * hdc_init() until hdc_shutdown().
  *
@@ -22,21 +22,21 @@
  *
  * torchhd-sparsr used to be the other half of that collision, keeping PyTorch tensors
  * resident in these same rows. It was made a caller of this library instead of a peer,
- * so it now holds its tensors on the host and this library owns CMEM alone.
+ * so it now holds its tensors on the host and this library owns WMEM alone.
  */
 
 #ifndef SPARSR_HDC_DEVICE_LAYOUT_H
 #define SPARSR_HDC_DEVICE_LAYOUT_H
 
-/* CMEM rows. The two-operand kernels use LEFT, RIGHT and RESULT; the bundle kernel uses
+/* WMEM rows. The two-operand kernels use LEFT, RIGHT and RESULT; the bundle kernel uses
  * LEFT as its running accumulator and RIGHT upwards as its operands. The two never run at
  * the same time, so the overlap costs nothing and keeps the reserved window small. */
 #define HDC_ROW_LEFT    0u
 #define HDC_ROW_RIGHT   1u
 #define HDC_ROW_RESULT  2u
 
-/* The first CMEM row a bundle takes its operands from, and how many it can hold at once.
- * CMEM has 32 rows and the accumulator keeps one, so a longer bundle runs as several
+/* The first WMEM row a bundle takes its operands from, and how many it can hold at once.
+ * WMEM has 32 rows and the accumulator keeps one, so a longer bundle runs as several
  * batches. OR is associative, so splitting it changes no answer. */
 #define HDC_ROW_BUNDLE_FIRST  HDC_ROW_RIGHT
 #define HDC_BUNDLE_MAX_OPERANDS_PER_BATCH  31u
@@ -116,12 +116,12 @@
 /*
  * The majority vote's counter planes: a contiguous block of wide registers, w4 upwards.
  *
- * WHY WIDE REGISTERS AND NOT CMEM ROWS. Counting set bits per position across N vectors
+ * WHY WIDE REGISTERS AND NOT WMEM ROWS. Counting set bits per position across N vectors
  * needs ceil(log2(N+1)) bit-planes, and a counter plane is dense by construction -- about
  * half its bits are set whatever the inputs looked like. Dense data does not fit a
- * compressed CMEM row, so there is nowhere else for the planes to go. That turns out to be
+ * compressed WMEM row, so there is nowhere else for the planes to go. That turns out to be
  * the better place anyway: a batch is a call and not a reset, so a wide register keeps its
- * value across batches, and the accumulator survives a bundle longer than CMEM holds
+ * value across batches, and the accumulator survives a bundle longer than WMEM holds
  * without spending a single row. `hdc_bundle`'s accumulator round-trips through a row only
  * because a union needs no state wider than one vector.
  *
@@ -171,7 +171,7 @@
  *
  * INTERSECT READS DMEM, BUT NOT FOR A STATUS. The intersect kernel now reduces to
  * a scalar overlap and the host reads it from HDC_DMEM_SIMILARITY_OVERLAP_WORD. That read
- * REPLACES the CMEM row read it used to do, so similarity costs the same frames as before
+ * REPLACES the WMEM row read it used to do, so similarity costs the same frames as before
  * and moves four bytes back instead of 240. It carries no status word, and adding one would
  * make similarity more expensive than it was rather than less.
  *

@@ -23,14 +23,14 @@
  * WHY THE PLANES LIVE IN WIDE REGISTERS
  *
  * A counter plane is dense by construction -- about half its bits are set whatever the
- * inputs looked like -- so it cannot be parked in a compressed CMEM row between batches.
+ * inputs looked like -- so it cannot be parked in a compressed WMEM row between batches.
  * Wide registers are the only place it can go, and that turns out to be the better place: a
  * batch is a call and not a reset, so the planes survive from one batch to the next and a
- * bundle longer than CMEM holds costs no rows at all. See hdc_device_layout.h.
+ * bundle longer than WMEM holds costs no rows at all. See hdc_device_layout.h.
  *
  * THE THREE MODES
  *
- * The host drives this in phases, because the operands arrive a CMEM-worth at a time:
+ * The host drives this in phases, because the operands arrive a WMEM-worth at a time:
  * reset once, accumulate as many times as it takes, threshold once. The mode word says
  * which, so one pre-loaded image serves all three rather than three images at three
  * instruction offsets.
@@ -67,14 +67,14 @@ extern volatile uint32_t hdc_majority_status[];
 /* ---- reset: zero every plane ------------------------------------------------------- */
 
 /* XOR of a register with itself is zero, whatever it held. No constant needed, and no
- * dependence on a CMEM row a caller would have to have written first. */
+ * dependence on a WMEM row a caller would have to have written first. */
 #define HDC_RESET_PLANE(j) _sparsr_wxor(HDC_PLANE(j), HDC_PLANE(j), HDC_PLANE(j));
 
 static void majority_reset(void) {
     HDC_PLANES_ASCENDING(HDC_RESET_PLANE)
 }
 
-/* ---- accumulate: fold `count` CMEM rows into the planes ---------------------------- */
+/* ---- accumulate: fold `count` WMEM rows into the planes ---------------------------- */
 
 /*
  * One full-adder step per plane, one wide instruction:
