@@ -340,7 +340,7 @@ static void test_a_member_stays_contained_in_the_bundle(void) {
 static void test_bundle_beyond_one_batch(void) {
     CASE("bundle across batches");
 
-    /* CMEM has 32 rows and one holds the running accumulator, so 40 members cannot all be
+    /* WMEM has 32 rows and one holds the running accumulator, so 40 members cannot all be
      * resident at once. The library splits the work; the answer must not change. */
     hdc_hypervector members[40];
     const hdc_hypervector *pointers[40];

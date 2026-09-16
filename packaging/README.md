@@ -61,14 +61,14 @@ its own library.
 
 ## The device is the library's while it is up
 
-From `hdc_init()` to `hdc_shutdown()` the library uses CMEM rows 0 to 31 and the front of
+From `hdc_init()` to `hdc_shutdown()` the library uses WMEM rows 0 to 31 and the front of
 instruction memory. A Sparsr device has no allocator for either today, so an application that
 loads its own kernel or keeps data in those rows would overwrite the library's, with no error on
 either side. Give the library the device to itself.
 
 ## Limits worth knowing before you start
 
-- A hypervector has to fit a compressed CMEM row: at most 48 non-zero four-byte lanes out of
+- A hypervector has to fit a compressed WMEM row: at most 48 non-zero four-byte lanes out of
   128. Bits spread across all 4096 positions have to be sparse; bits confined to 48 lanes can be
   at any density. `hdc_fits_device()` tells you which side of the line a vector is on.
 - `hdc_bundle` is the union, exact and cheap. `hdc_bundle_majority` is the majority vote, built
