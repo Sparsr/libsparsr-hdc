@@ -53,9 +53,10 @@ $(HOST_BIN): $(HOST_SRC) $(HDC_LIB) | check-sdk
 	    -Wl,-rpath,'$$ORIGIN/../../../build:$(abspath $(SPARSR_SDK_ROOT))/lib' -Wl,--no-as-needed \
 	    -lsparsr_hdc -lsparsr_host -lm -lstdc++ -pthread
 
-# The library's kernels are RV32I, so they run on the Sparsr VM, the default backend.
+# The library's kernels are RV32I, so they run on the Sparsr VM, the default backend. The
+# recipes still name it, so they also run against an older runtime with another default.
 run: all
-	SPARSR_MNIST_DIR=$(MNIST_DIR) ./$(HOST_BIN)
+	SPARSR_BACKEND=vm SPARSR_MNIST_DIR=$(MNIST_DIR) ./$(HOST_BIN)
 
 # What can be checked without the MNIST files, which are ~55 MB and in no repository: that
 # the example builds, links against the real library, and reports missing data as missing
@@ -63,7 +64,7 @@ run: all
 # to a script exactly like a classifier that worked.
 .PHONY: check
 check: all
-	@./$(HOST_BIN) --data ./no-mnist-here >/dev/null 2>$(BUILD_DIR)/check.err; \
+	@SPARSR_BACKEND=vm ./$(HOST_BIN) --data ./no-mnist-here >/dev/null 2>$(BUILD_DIR)/check.err; \
 	  status=$$?; \
 	  if [ "$$status" -ne 2 ]; then echo "Expected exit 2 with no data, got $$status."; cat $(BUILD_DIR)/check.err; exit 1; fi
 	@grep -q "train-images-idx3-ubyte" $(BUILD_DIR)/check.err \
