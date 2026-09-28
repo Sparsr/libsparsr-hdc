@@ -144,11 +144,11 @@ $(TEST_BIN): test/test_hdc.c $(LIB) $(KERNEL_HEADER)
 	    -Wl,-rpath,$(RPATH_TO_SPARSR_LIB) -Wl,--no-as-needed \
 	    -lsparsr_hdc -lsparsr_host -lm -lstdc++ -pthread
 
-# The kernels are RV32I, so they run on the Sparsr VM. The default softemu backend
-# executes a different instruction set and would read these images as something else.
+# The kernels are RV32I, so they run on the Sparsr VM. That is the default backend, so
+# the harness sets nothing.
 .PHONY: test
 test: $(TEST_BIN)
-	SPARSR_BACKEND=vm ./$(TEST_BIN)
+	./$(TEST_BIN)
 
 .PHONY: clean
 clean:

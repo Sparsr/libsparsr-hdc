@@ -14,7 +14,6 @@ They are proprietary software of Sparsr:
     lib/libsparsr_host.so
     lib/libsparsr_vm.so
     lib/libsparsr_vmproc.so
-    lib/libsparsr_softemu.so
 
 They are provided to you for running the HDC library and applications built on
 it. They are not open source. You may not redistribute them other than as part

@@ -1214,7 +1214,8 @@ int main(void) {
     hdc_status started = hdc_init();
     if (started != HDC_OK) {
         printf("FAIL: hdc_init returned %s\n", hdc_status_string(started));
-        printf("      The kernels are RV32I, so this needs SPARSR_BACKEND=vm.\n");
+        printf("      The kernels run on the Sparsr VM, the default backend. Check that\n"
+               "      libsparsr_vm.so is beside libsparsr_host.so.\n");
         printf("      init also probes the population-count reduce and refuses a backend\n");
         printf("      that cannot run it, so a wide ALU alone is not enough.\n");
         return 1;
