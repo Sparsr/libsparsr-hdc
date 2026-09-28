@@ -19,7 +19,7 @@ env:
   # secret, is a read-only token for that repository.
   # The tag of the GitHub release the SDK is taken from. Pinned so that an SDK change cannot break a
   # library change that touched nothing; bump it on purpose.
-  SPARSR_SDK_GITHUB_RELEASE_TAG: nightly-20260910-184506-34516050919-1
+  SPARSR_SDK_GITHUB_RELEASE_TAG: nightly-20260916-065931-35066187573-1
 
 jobs:
   build-and-test:

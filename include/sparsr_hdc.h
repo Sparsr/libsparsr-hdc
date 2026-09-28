@@ -71,7 +71,7 @@
  *
  * @section capacity Capacity is the limit you will actually hit
  *
- * A CMEM row holds a 4096-bit vector compressed into 240 bytes as at most
+ * A WMEM row holds a 4096-bit vector compressed into 240 bytes as at most
  * ::HDC_MAX_STORABLE_LANES non-zero four-byte lanes out of 128. **The limit counts lanes,
  * never set bits**, and each occupied lane is stored whole. Two consequences, and the
  * second one is easy to miss:
@@ -106,7 +106,7 @@ extern "C" {
 #define HDC_LANES (HDC_HYPERVECTOR_BYTES / 4)
 
 /**
- * Non-zero lanes that fit one CMEM row. A denser hypervector cannot be stored on the
+ * Non-zero lanes that fit one WMEM row. A denser hypervector cannot be stored on the
  * device at all, and every entry point that would have to store one refuses instead.
  */
 #define HDC_MAX_STORABLE_LANES 48
@@ -169,7 +169,7 @@ const char *hdc_status_string(hdc_status status);
  * with whatever data memory held, so this is checked once here rather than trusted.
  *
  * @warning It calls `sparsr_kernel_init()`, which clears every memory on the device, and
- * it then reserves CMEM rows 0 to 31 and the front of instruction memory for its own use.
+ * it then reserves WMEM rows 0 to 31 and the front of instruction memory for its own use.
  * Nothing arbitrates that today -- another library holding data in those rows will have it
  * overwritten, with no error on either side. A host-side memory manager that fixes it is
  * planned and not built.
@@ -201,7 +201,7 @@ int hdc_fits_device(const hdc_hypervector *vector);
  * Draws a hypervector with exactly @p weight set bits, chosen uniformly without
  * replacement. This is how a caller mints an atomic symbol.
  *
- * Keep @p weight at or below ::HDC_MAX_STORABLE_LANES and the result always fits a CMEM
+ * Keep @p weight at or below ::HDC_MAX_STORABLE_LANES and the result always fits a WMEM
  * row, since each set bit makes at most one lane non-zero. Ask for more and it may still
  * fit, but nothing guarantees it -- check hdc_fits_device().
  *
@@ -250,7 +250,7 @@ hdc_status hdc_unbind(const hdc_hypervector *bound, const hdc_hypervector *key, 
  * Superposes hypervectors into one that still contains every member: their union,
  * computed as a chain of WOR on the device.
  *
- * More members than CMEM holds is fine -- the work is split into several batches, and OR
+ * More members than WMEM holds is fine -- the work is split into several batches, and OR
  * is associative so the answer does not change.
  *
  * @return ::HDC_ERROR_TOO_DENSE if a member, or the growing union, needs more than
@@ -325,7 +325,7 @@ double hdc_jaccard(const hdc_similarity_result *similarity);
 /** One hypervector per class: what hdc_train() builds and hdc_classify() searches. */
 typedef struct hdc_memory hdc_memory;
 
-/** Classes one memory can hold. CMEM is the real limit on useful sizes long before this is. */
+/** Classes one memory can hold. WMEM is the real limit on useful sizes long before this is. */
 #define HDC_MAX_CLASSES 256
 
 /**

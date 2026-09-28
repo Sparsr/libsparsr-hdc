@@ -70,7 +70,7 @@ nothing.
 Bundling gets the larger share of it. The bundle kernel is a **loop**: the host writes the
 operand count into data memory and the kernel folds that many rows, so one pre-loaded
 program serves a bundle of any size instead of a differently unrolled program per count.
-It needs a CMEM row that varies at run time, which is the register-indirect wide load —
+It needs a WMEM row that varies at run time, which is the register-indirect wide load —
 the addressing that used to be the software-emulator-only `WLR`, and since the wide
 encoding was frozen is simply what the one wide load does when its base register is not
 `x0`.
@@ -83,11 +83,11 @@ directory to find at run time.
 
 ### What it reserves, and why that is a problem
 
-**This library takes CMEM rows 0 to 31 — every row there is — and the front of instruction
+**This library takes WMEM rows 0 to 31 — every row there is — and the front of instruction
 memory, from `hdc_init()` until `hdc_shutdown()`.** `src/device/hdc_device_layout.h` is the
 whole of that contract.
 
-Nothing arbitrates it. There is no allocator for CMEM rows and none for instruction memory,
+Nothing arbitrates it. There is no allocator for WMEM rows and none for instruction memory,
 so an application's own kernel loaded at word 0, or any other library keeping data in those
 rows, would be overwritten with no error on either side. Pre-loading makes that worse rather
 than better, because the library then holds instruction memory permanently. A host-side
@@ -96,13 +96,13 @@ memory manager would fix it. It is planned and not built.
 `torchhd-sparsr` used to be exactly that collision: it kept PyTorch tensors resident in these
 same rows. That was settled by making that package a caller of this library rather than a
 peer of it, so it now holds its tensors on the
-host and this library is the only owner of CMEM. That is a workaround for the missing
+host and this library is the only owner of WMEM. That is a workaround for the missing
 allocator, not a replacement for it — the cost is a host round trip per operation, which is
 what the memory manager would remove.
 
 ## The algebra, and what it costs
 
-This is **sparse binary VSA**, one of the two regimes a compressed CMEM row can hold.
+This is **sparse binary VSA**, one of the two regimes a compressed WMEM row can hold.
 Binding is XOR and bundling is the union, which needs no tiebreak and costs one instruction
 per member.
 
@@ -193,10 +193,10 @@ One saving is left and it needs no new instruction:
   charged for thirteen. The early exit already collects part of it, since planes above the
   counters' real width carry nothing and are skipped.
 
-The counter planes live in **wide registers**, not CMEM rows. A plane is dense by
+The counter planes live in **wide registers**, not WMEM rows. A plane is dense by
 construction — about half its bits set, whatever the inputs looked like — so there is
 nowhere else for it to go. That turns out to be the better place: a batch is a call and not
-a reset, so the planes survive from one batch to the next and a bundle longer than CMEM
+a reset, so the planes survive from one batch to the next and a bundle longer than WMEM
 holds spends no rows on the accumulator at all.
 
 **It is also the one operation here that reads a status word back.** Similarity reads data
@@ -240,7 +240,7 @@ the dense regime can do.
   and the host reads four bytes.
 
   This used to be the most expensive thing the library did: the device ANDed the operands
-  into a CMEM row and the host read all 4,096 bits back to count them. The device was never
+  into a WMEM row and the host read all 4,096 bits back to count them. The device was never
   what stopped it — the reduce mode ran on the Sparsr VM well before C could ask for it.
   The SDK was: `SPARSR_WOP_R` pinned the mode field to zero, so the header defined
   `SPARSR_WMODE_POPCOUNT` and could emit nothing that used it. A later SDK release added
@@ -275,7 +275,7 @@ distinctions you care about. A test records this so it cannot quietly stop being
 
 ## Capacity is the limit you will hit
 
-A CMEM row holds a 4096-bit vector compressed into 240 bytes as at most **48 non-zero
+A WMEM row holds a 4096-bit vector compressed into 240 bytes as at most **48 non-zero
 four-byte lanes** out of 128. The limit counts *lanes*, never set bits, and each occupied
 lane is stored whole. So:
 
@@ -289,7 +289,7 @@ lane is stored whole. So:
 - A **union grows**, so bundling enough members overflows the row. That returns
   `HDC_ERROR_TOO_DENSE`, predicted on the host from a 128-bit lane-occupancy map *before*
   anything is sent — not discovered afterwards.
-- `hdc_bundle` splits itself. CMEM has 32 rows and one holds the accumulator, so more than 31
+- `hdc_bundle` splits itself. WMEM has 32 rows and one holds the accumulator, so more than 31
   members run as several batches; `WOR` is associative, so the answer is the same.
 
 Predicting the overflow is not belt and braces, it is the only option: **the public host ABI
@@ -299,7 +299,7 @@ that trusted it would hand back the accumulator row as it stood before the refus
 valid-looking hypervector that silently lost members. A fix to the ABI is planned; until
 then this library does not put itself in a position to need it.
 
-Lifting the 48-lane ceiling is the uncompressed CMEM path, which is planned and not built.
+Lifting the 48-lane ceiling is the uncompressed WMEM path, which is planned and not built.
 
 ## What is here
 
@@ -308,7 +308,7 @@ Lifting the 48-lane ceiling is the uncompressed CMEM path, which is planned and 
 | `include/sparsr_hdc.h` | The public C API. The only header a caller includes. |
 | `src/sparsr_hdc.c` | The host side: kernel loading, the four operations, the memory. |
 | `src/device/*.c` | The kernels, in C, compiled for RV32I. |
-| `src/device/hdc_device_layout.h` | The CMEM rows and registers the host and the kernels share. |
+| `src/device/hdc_device_layout.h` | The WMEM rows and registers the host and the kernels share. |
 | `scripts/embed_kernels.py` | Turns the compiled images into a header the library compiles in. |
 | `test/test_hdc.c` | The harness. Runs every operation on a real device. |
 | `examples/mnist/` | MNIST end to end on this library. Builds against the repo, not the SDK. |
@@ -366,7 +366,7 @@ was reversed. Two consequences worth knowing:
   member count. See "What it costs" above; the early exit already collects part of this, and
   the rest needs entry points rather than any new instruction.
 - **No hypervector wider than 48 lanes**, in either regime. Lifting that is the uncompressed
-  CMEM path, planned and not built. It is what caps the
+  WMEM path, planned and not built. It is what caps the
   MNIST example at 1,536 of the 4,096 bit positions.
 - **Not in the SDK tarball, on purpose.** See "Why the example lives here" above. It is packaged
   as its own tarball instead, `sparsr-hdc-*.tar.gz`, packaged by Sparsr's release workflow

@@ -37,7 +37,7 @@
  *
  * WHY THE CODES ARE DENSE, AND WHY THEY ARE 48 LANES WIDE
  *
- * A hypervector reaches the device through a co-processor memory row, and a row stores at
+ * A hypervector reaches the device through a wide memory row, and a row stores at
  * most 48 non-zero four-byte lanes out of 128. The limit counts LANES, not set bits, and it
  * stores each occupied lane whole -- so bits inside an occupied lane are free.
  *

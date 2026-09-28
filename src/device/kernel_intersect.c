@@ -2,7 +2,7 @@
  * Similarity, on the device: how many bit positions two hypervectors both set.
  *
  * This kernel used to compute only half of that. It ANDed the two operands into a wide
- * register, stored the 4096-bit result to a CMEM row, and left the host to read all of it
+ * register, stored the 4096-bit result to a WMEM row, and left the host to read all of it
  * back and count the bits. The count was the cheap part; the read was the most expensive
  * thing this library did.
  *

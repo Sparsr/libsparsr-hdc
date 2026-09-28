@@ -119,7 +119,7 @@ on the ALU's result bus. Nothing reads a 4096-bit row back to count its bits.
 
 ### Why the codes are dense, and why they are 48 lanes wide
 
-A hypervector reaches the device through a co-processor memory row, and **a row stores at
+A hypervector reaches the device through a wide memory row, and **a row stores at
 most 48 non-zero four-byte lanes out of 128**. The limit counts *lanes*, never set bits, and
 it stores each occupied lane whole — so bits inside an occupied lane are free.
 
@@ -181,7 +181,7 @@ directly. Measured on 6,000 training and 1,000 test images:
 | 16 | 512 | 69.0% |
 | 48 | 1536 | 75.6% |
 
-48 is the widest a co-processor memory row can hold, so 1536 bits is the ceiling this
+48 is the widest a wide memory row can hold, so 1536 bits is the ceiling this
 example can reach today.
 
 ```bash
