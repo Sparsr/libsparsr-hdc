@@ -31,13 +31,13 @@ Or build and run the two steps separately:
 
 ```bash
 make
-./build/mnist_hdc --data /path/to/mnist
+SPARSR_BACKEND=vm ./build/mnist_hdc --data /path/to/mnist
 ```
 
 A full run takes about half a minute. For a quick look, use a slice of the data:
 
 ```bash
-./build/mnist_hdc --data /path/to/mnist --train 6000 --test 1000
+SPARSR_BACKEND=vm ./build/mnist_hdc --data /path/to/mnist --train 6000 --test 1000
 ```
 
 `make check` builds it and confirms it reports missing data correctly, which is what CI runs
@@ -54,9 +54,9 @@ memory for you. The toolchain is needed to *build* the library, not to use it.
 not in the SDK. That tarball is the Sparsr *Kernel* SDK, and someone writing hyperdimensional
 computing code is not the person it is for.
 
-The library's device programs are RV32I, so they run on the Sparsr VM, which is the default
-backend. Nothing needs setting. `SPARSR_BACKEND=vmproc` runs the same VM in a process of its
-own.
+Run it with `SPARSR_BACKEND=vm`, which `make run` sets. The library's device programs are RV32I
+and run on the Sparsr VM, and naming the backend means you always know which device computed a
+result. `SPARSR_BACKEND=vmproc` runs the same VM in a process of its own.
 
 ### The data files
 
@@ -185,7 +185,7 @@ directly. Measured on 6,000 training and 1,000 test images:
 example can reach today.
 
 ```bash
-./build/mnist_hdc --data /path/to/mnist --lanes 8
+SPARSR_BACKEND=vm ./build/mnist_hdc --data /path/to/mnist --lanes 8
 ```
 
 Exit codes: `0` if it ran, `2` if the MNIST files were not found, `3` if something failed.

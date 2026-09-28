@@ -42,7 +42,7 @@ With the tarball unpacked at `$SPARSR_HDC`:
 ```sh
 gcc -I$SPARSR_HDC/include app.c -L$SPARSR_HDC/lib -lsparsr_hdc -lsparsr_host -lm \
     -Wl,-rpath,$SPARSR_HDC/lib -o app
-./app
+SPARSR_BACKEND=vm ./app
 ```
 
 You need a C compiler and nothing else. The kernels the library runs on the device are compiled
@@ -50,11 +50,11 @@ into `libsparsr_hdc.so` already, so there is no RISC-V toolchain to install.
 
 ## The backend
 
-The library's device kernels are RV32I, so they run on the Sparsr VM, which is the runtime's
-default backend. Leave `SPARSR_BACKEND` unset and the kernels run there, loaded from
-`lib/libsparsr_vm.so` beside `libsparsr_host.so`. There is no fallback device: if the selected
-backend cannot be loaded, or cannot run the kernels, `hdc_init()` refuses to come up, so a wrong
-setting fails at start rather than returning wrong answers.
+Set `SPARSR_BACKEND=vm`. The library's device kernels are RV32I and run on the Sparsr VM, loaded
+from `lib/libsparsr_vm.so` beside `libsparsr_host.so`. Naming the backend means you always know
+which device computed a result. If the named backend cannot be loaded, or cannot run the kernels,
+`hdc_init()` refuses to come up, so a wrong setting fails at start rather than returning wrong
+answers.
 
 `SPARSR_BACKEND=vmproc` runs the same VM in a process of its own, which the runtime starts from
 `bin/sparsr-vm`. Keep `bin/` beside `lib/`: the backend finds the program at `../bin` relative to

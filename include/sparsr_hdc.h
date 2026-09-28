@@ -28,9 +28,9 @@
  * @section backend Which device it runs on
  *
  * Whichever one libsparsr_host is pointed at, through the `SPARSR_BACKEND` environment
- * variable. **The kernels are RV32I, so they run on the Sparsr VM, which is the default
- * backend**: leave `SPARSR_BACKEND` unset and they run there. `SPARSR_BACKEND=vmproc` runs
- * the same VM in a process of its own. There is no fallback device: if the selected backend
+ * variable. **Run it with `SPARSR_BACKEND=vm`**: the kernels are RV32I and run on the Sparsr
+ * VM, and naming the backend means you always know which device computed a result.
+ * `SPARSR_BACKEND=vmproc` runs the same VM in a process of its own. If the named backend
  * cannot be loaded, hdc_init() fails with its device error.
  *
  * @section algebra The algebra, and what it costs
