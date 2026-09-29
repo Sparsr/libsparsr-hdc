@@ -406,7 +406,7 @@ int main(int argc, char **argv) {
     hdc_status status = hdc_init();
     if (status != HDC_OK) {
         fprintf(stderr, "hdc_init failed: %s\n", hdc_status_string(status));
-        fprintf(stderr, "This library's kernels are RV32I, so it needs SPARSR_BACKEND=vm.\n");
+        fprintf(stderr, "This library's kernels run on the Sparsr VM. Set SPARSR_BACKEND=vm, and check that libsparsr_vm.so is beside libsparsr_host.so.\n");
         free_dataset(&training);
         free_dataset(&test);
         return EXIT_FAILED;

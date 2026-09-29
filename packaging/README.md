@@ -50,10 +50,11 @@ into `libsparsr_hdc.so` already, so there is no RISC-V toolchain to install.
 
 ## The backend
 
-`SPARSR_BACKEND=vm` is required today. The library's device kernels are RV32I, and the runtime's
-default backend, `softemu`, executes a different instruction set. `hdc_init()` refuses to come
-up on a backend that cannot run the kernels, so a wrong setting fails at start rather than
-returning wrong answers.
+Set `SPARSR_BACKEND=vm`. The library's device kernels are RV32I and run on the Sparsr VM, loaded
+from `lib/libsparsr_vm.so` beside `libsparsr_host.so`. Naming the backend means you always know
+which device computed a result. If the named backend cannot be loaded, or cannot run the kernels,
+`hdc_init()` refuses to come up, so a wrong setting fails at start rather than returning wrong
+answers.
 
 `SPARSR_BACKEND=vmproc` runs the same VM in a process of its own, which the runtime starts from
 `bin/sparsr-vm`. Keep `bin/` beside `lib/`: the backend finds the program at `../bin` relative to

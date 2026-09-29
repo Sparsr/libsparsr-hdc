@@ -40,10 +40,11 @@ Whatever `libsparsr_host` is pointed at, through the `SPARSR_BACKEND` environmen
 `-lsparsr_host` and includes `sparsr.h`, and it knows nothing about which device is on the
 other side.
 
-**`SPARSR_BACKEND=vm` is required today.** The kernels are RV32I, and the default `softemu`
-backend executes MIPS words; it would read these images as something else entirely. That is
-not special to this library — it is the rule for every C kernel, and it goes away when the
-assembler and the hardware catch up.
+**Run it with `SPARSR_BACKEND=vm`.** The kernels are RV32I and run on the Sparsr VM. Naming
+the backend means you always know which device computed a result: with the variable unset, the
+runtime picks a device itself. `SPARSR_BACKEND=vmproc` runs the same VM in a process of its own.
+If the named backend cannot be loaded, `hdc_init()` fails with its device error instead of
+running somewhere else.
 
 ## Kernels are loaded once
 

@@ -28,10 +28,10 @@
  * @section backend Which device it runs on
  *
  * Whichever one libsparsr_host is pointed at, through the `SPARSR_BACKEND` environment
- * variable. **The kernels are RV32I, so `SPARSR_BACKEND=vm` is required today**: the
- * default `softemu` backend executes MIPS words and would read these images as something
- * else entirely. That is not a limitation of this library -- it is the same rule as any
- * other C kernel, and it goes away when the assembler and the hardware catch up.
+ * variable. **Run it with `SPARSR_BACKEND=vm`**: the kernels are RV32I and run on the Sparsr
+ * VM, and naming the backend means you always know which device computed a result.
+ * `SPARSR_BACKEND=vmproc` runs the same VM in a process of its own. If the named backend
+ * cannot be loaded, hdc_init() fails with its device error.
  *
  * @section algebra The algebra, and what it costs
  *

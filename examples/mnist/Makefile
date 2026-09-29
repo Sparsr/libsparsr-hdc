@@ -53,8 +53,8 @@ $(HOST_BIN): $(HOST_SRC) $(HDC_LIB) | check-sdk
 	    -Wl,-rpath,'$$ORIGIN/../../../build:$(abspath $(SPARSR_SDK_ROOT))/lib' -Wl,--no-as-needed \
 	    -lsparsr_hdc -lsparsr_host -lm -lstdc++ -pthread
 
-# The library's kernels are RV32I, so they run on the Sparsr VM. The default softemu backend
-# executes a different instruction set and would read those images as something else.
+# The library's kernels are RV32I, so they run on the Sparsr VM. The recipes name that backend,
+# so a result always comes from the device they say it does.
 run: all
 	SPARSR_BACKEND=vm SPARSR_MNIST_DIR=$(MNIST_DIR) ./$(HOST_BIN)
 

@@ -54,9 +54,9 @@ memory for you. The toolchain is needed to *build* the library, not to use it.
 not in the SDK. That tarball is the Sparsr *Kernel* SDK, and someone writing hyperdimensional
 computing code is not the person it is for.
 
-`SPARSR_BACKEND=vm` is required, and `make run` sets it. The library's device programs are
-RV32I; the default `softemu` backend executes a different instruction set and would read them
-as something else entirely.
+Run it with `SPARSR_BACKEND=vm`, which `make run` sets. The library's device programs are RV32I
+and run on the Sparsr VM, and naming the backend means you always know which device computed a
+result. `SPARSR_BACKEND=vmproc` runs the same VM in a process of its own.
 
 ### The data files
 
