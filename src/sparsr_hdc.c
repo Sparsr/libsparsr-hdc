@@ -407,7 +407,19 @@ hdc_status hdc_bundle_majority(const hdc_hypervector *const *vectors, size_t cou
     if (device_status == HDC_MAJORITY_STATUS_TOO_DENSE) return HDC_ERROR_TOO_DENSE;
     if (device_status != HDC_MAJORITY_STATUS_OK) return HDC_ERROR_DEVICE;
 
-    return read_row(HDC_ROW_LEFT, out);
+    /*
+     * The vote is counted here, not trusted to the store. A device that stores a raw row
+     * stores a vote of any density, so the store succeeding says nothing about whether the
+     * result fits a compressed row. A device that refuses the store still ends the batch
+     * with TOO_DENSE in the status word, which the line above catches.
+     */
+    hdc_hypervector vote;
+    status = read_row(HDC_ROW_LEFT, &vote);
+    if (status != HDC_OK) return status;
+    if (!hdc_fits_device(&vote)) return HDC_ERROR_TOO_DENSE;
+
+    *out = vote;
+    return HDC_OK;
 }
 
 hdc_status hdc_bundle(const hdc_hypervector *const *vectors, size_t count, hdc_hypervector *out) {
@@ -416,11 +428,12 @@ hdc_status hdc_bundle(const hdc_hypervector *const *vectors, size_t count, hdc_h
 
     /*
      * A union grows, so a bundle can outgrow a compressed row partway through even when
-     * every member fits on its own. The device faults rather than truncating -- but the
-     * public host ABI cannot report that: read_status carries one done bit, and a
-     * faulting batch sets it exactly like a successful one. A caller would be handed the
-     * accumulator row as it stood before the refused store: a valid-looking hypervector
-     * that silently lost members.
+     * every member fits on its own. Some devices refuse such a store, and the public host
+     * ABI cannot report that: read_status carries one done bit, and a faulting batch sets
+     * it exactly like a successful one. A caller would be handed the accumulator row as it
+     * stood before the refused store: a valid-looking hypervector that silently lost
+     * members. Other devices store the row whole, and then the result is simply too dense
+     * for the next operation to accept.
      *
      * So the overflow is predicted here, before anything is sent. What decides it is which
      * *lanes* end up non-zero, not the bits inside them, and that is a 128-bit occupancy

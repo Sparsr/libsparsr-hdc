@@ -205,7 +205,9 @@ memory too, but for its result rather than for a verdict — its kernel holds no
 compressed row and so has nothing that can fault. The other three predict a row overflow on
 the host before sending anything, from a lane-occupancy map. A majority cannot be predicted
 that way: its lane occupancy is not a function of its members' lane occupancy, so the only
-way to know is to compute the vote, which is what the device is for.
+way to know is to compute the vote, which is what the device is for. So the host counts the
+vote's lanes after reading it back, rather than relying on the store to fail: a device that
+stores raw rows stores a vote of any density.
 `test_a_vote_too_dense_to_store_is_reported` is the worked case — three members each
 occupying exactly 48 lanes, voting to something that occupies 72.
 
