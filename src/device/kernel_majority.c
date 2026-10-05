@@ -222,12 +222,12 @@ void kernel_main(void) {
 
     if (mode == HDC_MAJORITY_MODE_THRESHOLD) {
         /*
-         * The store is the one instruction here that can fault: a vote is not sparse just
-         * because its inputs were, and a result of more than 48 non-zero lanes does not fit
-         * a compressed row. The device refuses it rather than truncating, but the host ABI
-         * cannot see that -- so the status word is written BEFORE the store, and
-         * overwritten with OK after it. A refused store ends the batch, leaving TOO_DENSE
-         * behind for the host to find.
+         * A vote is not sparse just because its inputs were, and a result of more than 48
+         * non-zero lanes does not fit a compressed row. The host counts the vote's lanes
+         * itself after reading it back, because a device that stores raw rows stores any
+         * density. A device that refuses such a store ends the batch instead, and the host
+         * ABI cannot see that -- so the status word is written BEFORE the store, and
+         * overwritten with OK after it, which leaves TOO_DENSE behind for the host to find.
          */
         hdc_majority_status[0] = HDC_MAJORITY_STATUS_TOO_DENSE;
         majority_threshold(hdc_majority_total[0]);
